@@ -2,6 +2,86 @@ import React, { useRef, useState, useEffect } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import jsPDF from "jspdf";
 
+// Country and Phone Code Data
+const countries = [
+  { name: "United States", code: "US", phoneCode: "+1" },
+  { name: "United Kingdom", code: "GB", phoneCode: "+44" },
+  { name: "Canada", code: "CA", phoneCode: "+1" },
+  { name: "Australia", code: "AU", phoneCode: "+61" },
+  { name: "Germany", code: "DE", phoneCode: "+49" },
+  { name: "France", code: "FR", phoneCode: "+33" },
+  { name: "Italy", code: "IT", phoneCode: "+39" },
+  { name: "Spain", code: "ES", phoneCode: "+34" },
+  { name: "Netherlands", code: "NL", phoneCode: "+31" },
+  { name: "Belgium", code: "BE", phoneCode: "+32" },
+  { name: "Switzerland", code: "CH", phoneCode: "+41" },
+  { name: "Austria", code: "AT", phoneCode: "+43" },
+  { name: "Portugal", code: "PT", phoneCode: "+351" },
+  { name: "Ireland", code: "IE", phoneCode: "+353" },
+  { name: "Denmark", code: "DK", phoneCode: "+45" },
+  { name: "Sweden", code: "SE", phoneCode: "+46" },
+  { name: "Norway", code: "NO", phoneCode: "+47" },
+  { name: "Finland", code: "FI", phoneCode: "+358" },
+  { name: "Poland", code: "PL", phoneCode: "+48" },
+  { name: "Czech Republic", code: "CZ", phoneCode: "+420" },
+  { name: "Hungary", code: "HU", phoneCode: "+36" },
+  { name: "Romania", code: "RO", phoneCode: "+40" },
+  { name: "Greece", code: "GR", phoneCode: "+30" },
+  { name: "Turkey", code: "TR", phoneCode: "+90" },
+  { name: "Russia", code: "RU", phoneCode: "+7" },
+  { name: "China", code: "CN", phoneCode: "+86" },
+  { name: "Japan", code: "JP", phoneCode: "+81" },
+  { name: "South Korea", code: "KR", phoneCode: "+82" },
+  { name: "India", code: "IN", phoneCode: "+91" },
+  { name: "Singapore", code: "SG", phoneCode: "+65" },
+  { name: "Thailand", code: "TH", phoneCode: "+66" },
+  { name: "Malaysia", code: "MY", phoneCode: "+60" },
+  { name: "Indonesia", code: "ID", phoneCode: "+62" },
+  { name: "Philippines", code: "PH", phoneCode: "+63" },
+  { name: "Vietnam", code: "VN", phoneCode: "+84" },
+  { name: "United Arab Emirates", code: "AE", phoneCode: "+971" },
+  { name: "Saudi Arabia", code: "SA", phoneCode: "+966" },
+  { name: "Israel", code: "IL", phoneCode: "+972" },
+  { name: "Egypt", code: "EG", phoneCode: "+20" },
+  { name: "South Africa", code: "ZA", phoneCode: "+27" },
+  { name: "Nigeria", code: "NG", phoneCode: "+234" },
+  { name: "Kenya", code: "KE", phoneCode: "+254" },
+  { name: "Brazil", code: "BR", phoneCode: "+55" },
+  { name: "Argentina", code: "AR", phoneCode: "+54" },
+  { name: "Chile", code: "CL", phoneCode: "+56" },
+  { name: "Colombia", code: "CO", phoneCode: "+57" },
+  { name: "Mexico", code: "MX", phoneCode: "+52" },
+  { name: "New Zealand", code: "NZ", phoneCode: "+64" },
+  { name: "South Africa", code: "ZA", phoneCode: "+27" },
+  { name: "Morocco", code: "MA", phoneCode: "+212" },
+  { name: "Tunisia", code: "TN", phoneCode: "+216" },
+  { name: "Algeria", code: "DZ", phoneCode: "+213" },
+  { name: "Peru", code: "PE", phoneCode: "+51" },
+  { name: "Venezuela", code: "VE", phoneCode: "+58" },
+  { name: "Uruguay", code: "UY", phoneCode: "+598" },
+  { name: "Paraguay", code: "PY", phoneCode: "+595" },
+  { name: "Bolivia", code: "BO", phoneCode: "+591" },
+  { name: "Ecuador", code: "EC", phoneCode: "+593" },
+  { name: "Costa Rica", code: "CR", phoneCode: "+506" },
+  { name: "Panama", code: "PA", phoneCode: "+507" },
+  { name: "Guatemala", code: "GT", phoneCode: "+502" },
+  { name: "Honduras", code: "HN", phoneCode: "+504" },
+  { name: "El Salvador", code: "SV", phoneCode: "+503" },
+  { name: "Nicaragua", code: "NI", phoneCode: "+505" },
+  { name: "Jamaica", code: "JM", phoneCode: "+1876" },
+  { name: "Cuba", code: "CU", phoneCode: "+53" },
+  { name: "Haiti", code: "HT", phoneCode: "+509" },
+  { name: "Dominican Republic", code: "DO", phoneCode: "+1809" },
+  { name: "Puerto Rico", code: "PR", phoneCode: "+1787" },
+  { name: "Trinidad and Tobago", code: "TT", phoneCode: "+1868" },
+  { name: "Barbados", code: "BB", phoneCode: "+1246" },
+  { name: "Bahamas", code: "BS", phoneCode: "+1242" },
+  { name: "Belize", code: "BZ", phoneCode: "+501" },
+  { name: "Guyana", code: "GY", phoneCode: "+592" },
+  { name: "Suriname", code: "SR", phoneCode: "+597" },
+  { name: "French Guiana", code: "GF", phoneCode: "+594" },
+];
+
 function TravelAgentReports() {
   const travelerSigRef = useRef(null);
   const agentSigRef = useRef(null);
@@ -11,8 +91,9 @@ function TravelAgentReports() {
     bookingNo: "",
     name: "",
     phone: "",
-    email: "",
+    phoneCode: "+1",
     country: "",
+    countryCode: "US",
     hotelName: "",
     agentName: "",
     stayFrom: "",
@@ -36,6 +117,18 @@ function TravelAgentReports() {
 
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value});
+  };
+
+  const handleCountryChange = (e) => {
+    const selectedCountry = countries.find(country => country.code === e.target.value);
+    if (selectedCountry) {
+      setFormData({
+        ...formData,
+        countryCode: selectedCountry.code,
+        country: selectedCountry.name,
+        phoneCode: selectedCountry.phoneCode
+      });
+    }
   };
 
   const clearSignatures = () => {
@@ -194,10 +287,11 @@ function TravelAgentReports() {
     }
 
     const csvContent = [
-      ['Booking No', 'Name', 'Phone', 'Email', 'Country', 'Hotel Name', 'Agent Name', 'Stay From', 'Stay To', 'Problem Type', 'Report Text', 'Created At'],
+      ['Booking No', 'Name', 'Phone Code', 'Phone', 'Email', 'Country', 'Hotel Name', 'Agent Name', 'Stay From', 'Stay To', 'Problem Type', 'Report Text', 'Created At'],
       ...savedReports.map(report => [
         report.bookingNo,
         report.name,
+        report.phoneCode,
         report.phone,
         report.email,
         report.country,
@@ -314,16 +408,16 @@ function TravelAgentReports() {
         <h1>Travel Agent Reports</h1>
         <div className="nav-buttons">
           <button className={`nav-btn ${view === 'form' ? 'active' : ''}`} onClick={() => setView('form')}>
-            New Report
+            <span className="btn-icon">📝</span> New Report
           </button>
           <button className={`nav-btn ${view === 'dashboard' ? 'active' : ''}`} onClick={() => setView('dashboard')}>
-            Dashboard ({savedReports.length})
+            <span className="btn-icon">📊</span> Dashboard ({savedReports.length})
           </button>
         </div>
       </div>
 
       {view === 'form' ? (
-        <div className="form-container">
+        <div className="form-container fade-in">
           <div className="form-section">
             <h2>Report Details</h2>
             <div className="form-grid">
@@ -353,14 +447,30 @@ function TravelAgentReports() {
               </div>
               <div className="form-group">
                 <label htmlFor="phone">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  placeholder="Enter phone number"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
+                <div className="phone-input-group">
+                  <select
+                    id="phoneCode"
+                    name="phoneCode"
+                    value={formData.phoneCode}
+                    onChange={handleChange}
+                    className="phone-code-select"
+                  >
+                    {countries.map(country => (
+                      <option key={country.code} value={country.phoneCode}>
+                        {country.phoneCode}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter phone number"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="phone-number-input"
+                  />
+                </div>
               </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
@@ -375,14 +485,19 @@ function TravelAgentReports() {
               </div>
               <div className="form-group">
                 <label htmlFor="country">Country</label>
-                <input
-                  type="text"
+                <select
                   id="country"
-                  name="country"
-                  placeholder="Enter country"
-                  value={formData.country}
-                  onChange={handleChange}
-                />
+                  name="countryCode"
+                  value={formData.countryCode}
+                  onChange={handleCountryChange}
+                  className="country-select"
+                >
+                  {countries.map(country => (
+                    <option key={country.code} value={country.code}>
+                      {country.name} (+{country.phoneCode})
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label htmlFor="hotelName">Hotel Name</label>
@@ -484,28 +599,28 @@ function TravelAgentReports() {
 
           <div className="form-actions">
             <button className="btn btn-primary" onClick={saveReport}>
-              Save Report
+              <span className="btn-icon">💾</span> Save Report
             </button>
             <button className="btn btn-secondary" onClick={generatePDF}>
-              Export to PDF
+              <span className="btn-icon">📄</span> Export to PDF
             </button>
             <button className="btn btn-outline" onClick={clearSignatures}>
-              Clear Signatures
+              <span className="btn-icon">🗑️</span> Clear Signatures
             </button>
           </div>
         </div>
       ) : (
-        <div className="dashboard-container">
+        <div className="dashboard-container fade-in">
           <div className="dashboard-header">
             <h2>Reports Dashboard</h2>
             <button className="btn btn-export" onClick={exportAllReports}>
-              Export All to CSV
+              <span className="btn-icon">📥</span> Export All to CSV
             </button>
           </div>
           
           {savedReports.length === 0 ? (
             <div className="empty-state">
-              <p>No reports saved yet. Create your first report!</p>
+              <p>📋 No reports saved yet. Create your first report!</p>
             </div>
           ) : (
             <div className="reports-grid">
@@ -513,25 +628,25 @@ function TravelAgentReports() {
                 <div key={report.id} className="report-card">
                   <div className="report-header">
                     <h3>Report #{report.bookingNo}</h3>
-                    <span className="report-date">{report.createdAt}</span>
+                    <span className="report-date">📅 {report.createdAt}</span>
                   </div>
                   <div className="report-content">
-                    <p><strong>Name:</strong> {report.name}</p>
-                    <p><strong>Phone:</strong> {report.phone}</p>
-                    <p><strong>Email:</strong> {report.email}</p>
-                    <p><strong>Country:</strong> {report.country}</p>
-                    <p><strong>Hotel:</strong> {report.hotelName}</p>
-                    <p><strong>Agent:</strong> {report.agentName}</p>
-                    <p><strong>Problem:</strong> {report.problemType}</p>
-                    <p><strong>Report:</strong> {report.reportText}</p>
+                    <p><strong>👤 Name:</strong> {report.name}</p>
+                    <p><strong>📱 Phone:</strong> {report.phoneCode} {report.phone}</p>
+                    <p><strong>📧 Email:</strong> {report.email}</p>
+                    <p><strong>🌍 Country:</strong> {report.country}</p>
+                    <p><strong>🏨 Hotel:</strong> {report.hotelName}</p>
+                    <p><strong>👤 Agent:</strong> {report.agentName}</p>
+                    <p><strong>⚠️ Problem:</strong> {report.problemType}</p>
+                    <p><strong>📝 Report:</strong> {report.reportText}</p>
                   </div>
                   <div className="report-signatures">
                     <div className="signature-preview">
-                      <h4>Traveler Signature</h4>
+                      <h4>✍️ Traveler Signature</h4>
                       <img src={report.travelerSignature} alt="Traveler signature" className="signature-img" />
                     </div>
                     <div className="signature-preview">
-                      <h4>Agent Signature</h4>
+                      <h4>✍️ Agent Signature</h4>
                       <img src={report.agentSignature} alt="Agent signature" className="signature-img" />
                     </div>
                   </div>
@@ -539,7 +654,6 @@ function TravelAgentReports() {
                     <button 
                       className="btn btn-view" 
                       onClick={() => {
-                        // Switch to form view and populate with report data
                         setView('form');
                         setFormData({
                           bookingNo: report.bookingNo,
@@ -556,19 +670,19 @@ function TravelAgentReports() {
                         });
                       }}
                     >
-                      View
+                      <span className="btn-icon">👁️</span> View
                     </button>
                     <button 
                       className="btn btn-export" 
                       onClick={() => exportReportPDF(report)}
                     >
-                      Export PDF
+                      <span className="btn-icon">📄</span> Export PDF
                     </button>
                     <button 
                       className="btn btn-danger" 
                       onClick={() => deleteReport(report.id)}
                     >
-                      Delete
+                      <span className="btn-icon">🗑️</span> Delete
                     </button>
                   </div>
                 </div>
